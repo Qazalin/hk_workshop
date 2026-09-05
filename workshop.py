@@ -55,7 +55,7 @@ def main():
     command.add_argument("--challenge", choices=["1", "2", "3"])
 
   submit_command.add_argument("--name", required=True)
-  submit_command.add_argument("--server", default=os.environ.get("WORKSHOP_SERVER", "http://localhost:3000"))
+  submit_command.add_argument("--server", default=os.environ.get("WORKSHOP_SERVER", "https://hk-workshop.vercel.app"))
   args = parser.parse_args()
 
   challenge = args.challenge or pathlib.Path(args.file).stem

@@ -7,9 +7,9 @@ COPY requirements.txt /tmp/requirements.txt
 RUN python -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements.txt
 RUN mkdir -p /home/coder/.local/share/code-server/User && printf '{"workbench.colorTheme":"Default Dark Modern","terminal.integrated.cwd":"/home/coder/workshop","remote.autoForwardPorts":false}\n' > /home/coder/.local/share/code-server/User/settings.json \
     && chown -R coder:coder /home/coder/.local
-COPY --chown=coder:coder participant/1.py participant/2.py participant/3.py participant/workshop.py participant/INSTRUCTIONS.md /home/coder/workshop/
+COPY --chown=coder:coder 1.py 2.py 3.py workshop.py README.md /home/coder/workshop/
 
-ENV DEV=CPU
+ENV DEV=CPU WORKSHOP_SERVER=https://hk-workshop.vercel.app
 USER coder
 WORKDIR /home/coder/workshop
 
