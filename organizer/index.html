@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>tinygrad workshop</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #111;
+        --track: #1d1d1b;
+        --line: #333;
+        --text: #eee;
+        --muted: #939393;
+        --green: #80bc00;
+        --fill: #527d08;
+        --yellow: #f0bf34;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          16px/1.5 Arial,
+          Helvetica,
+          sans-serif;
+      }
+      main {
+        max-width: 1600px;
+        margin: auto;
+        padding: 36px 48px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--line);
+        gap: 18px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand small {
+        color: #777;
+        letter-spacing: 2px;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .square {
+        width: 9px;
+        height: 9px;
+        background: var(--green);
+        box-shadow: 0 0 15px #80bc0044;
+      }
+      .brand strong {
+        font-size: 25px;
+        letter-spacing: -0.7px;
+      }
+      .hardware {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 7px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .hardware span {
+        color: #999;
+        padding-left: 12px;
+      }
+      .hardware b {
+        background: var(--green);
+        color: #111;
+        border-radius: 6px;
+        padding: 12px 22px;
+      }
+      .round {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        margin: 24px 0 36px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .live {
+        color: var(--green);
+      }
+      .offline {
+        color: var(--yellow);
+      }
+      .board {
+        min-height: 320px;
+      }
+      .column-title {
+        margin-left: 235px;
+        text-align: center;
+        color: #a0a0a0;
+        margin-bottom: 14px;
+        font-size: 15px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 9px;
+      }
+      .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .track {
+        position: relative;
+        background: var(--track);
+        min-height: 44px;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font:
+          700 17px ui-monospace,
+          SFMono-Regular,
+          monospace;
+        border: 1px solid transparent;
+      }
+      .fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        background: var(--fill);
+        transition: width 0.5s ease;
+        border-radius: 3px;
+      }
+      .winner .fill {
+        background: var(--green);
+      }
+      .winner {
+        box-shadow: 0 0 20px #80bc0026;
+      }
+      .value {
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 3px #0009;
+      }
+      .star {
+        position: absolute;
+        right: 7px;
+        top: 0;
+        color: #fff5a2;
+        z-index: 2;
+        font-size: 15px;
+      }
+      .status {
+        background: #2c2617;
+        border-color: #846b29;
+        color: var(--yellow);
+        font-size: 14px;
+      }
+      .failed {
+        background: #301e22;
+        border-color: #914755;
+        color: #ff697d;
+      }
+      .idle {
+        color: #777;
+        font-size: 14px;
+      }
+      .empty {
+        text-align: center;
+        padding: 90px 20px;
+        color: #929292;
+      }
+      .empty strong {
+        display: block;
+        font-weight: 400;
+        color: #ddd;
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      .legend {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 24px 0 60px;
+        color: #858585;
+        font-size: 13px;
+      }
+      .history {
+        margin-top: 50px;
+      }
+      .history-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 21px;
+        margin: 0 0 20px;
+      }
+      .history-title small {
+        color: #777;
+        letter-spacing: 2px;
+        font-size: 14px;
+      }
+      .history-title .square {
+        background: #32b8e7;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+        text-align: left;
+      }
+      th {
+        color: #888;
+        font-weight: 400;
+        padding: 10px 12px;
+      }
+      td {
+        padding: 10px 12px;
+        border-top: 1px solid #252525;
+      }
+      .pass {
+        color: #95cb2c;
+      }
+      .fail {
+        color: #ff697d;
+      }
+      .pending {
+        color: var(--yellow);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .archive {
+        margin-bottom: 42px;
+      }
+      .archive .row {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+      .archive .track {
+        min-height: 36px;
+        font-size: 15px;
+      }
+      .archive .column-title {
+        font-size: 15px;
+      }
+      details {
+        margin-top: 35px;
+      }
+      summary {
+        color: #888;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      footer {
+        margin-top: 36px;
+        color: #666;
+        font-size: 13px;
+      }
+      button:focus-visible,
+      summary:focus-visible {
+        outline: 2px solid var(--green);
+        outline-offset: 4px;
+      }
+      @media (max-width: 700px) {
+        main {
+          padding: 24px 16px;
+        }
+        header {
+          align-items: flex-start;
+        }
+        .brand {
+          gap: 8px;
+        }
+        .brand small {
+          font-size: 12px;
+        }
+        .brand strong {
+          font-size: 20px;
+        }
+        .hardware {
+          font-size: 12px;
+          gap: 8px;
+        }
+        .hardware b {
+          padding: 8px 12px;
+        }
+        .hardware span {
+          padding-left: 4px;
+        }
+        .row,
+        .archive .row {
+          grid-template-columns: 125px minmax(0, 1fr);
+          gap: 10px;
+        }
+        .name {
+          font-size: 14px;
+          gap: 6px;
+        }
+        .column-title {
+          margin-left: 135px;
+        }
+        .round,
+        .legend {
+          font-size: 12px;
+        }
+        .legend {
+          margin-bottom: 36px;
+        }
+        .track {
+          font-size: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand">
+          <small>TINYGRAD</small><span class="square"></span
+          ><strong>Workshop</strong>
+        </div>
+        <div class="hardware"><span>CPU</span><b id="architecture">CPU</b></div>
+      </header>
+      <div class="round">
+        <span id="round-label">Waiting for a challenge</span
+        ><span id="connection" role="status">Connecting…</span>
+      </div>
+      <section
+        class="board"
+        id="board"
+        aria-label="Current challenge scores"
+      ></section>
+      <div class="legend">
+        <span>Speedup over baseline · higher is better · ★ best score</span
+        ><span id="counts">No submissions</span>
+      </div>
+      <section class="history" id="history" hidden>
+        <h2 class="history-title">
+          <small>TINYGRAD</small><span class="square"></span>Previous challenges
+        </h2>
+        <div id="previous"></div>
+      </section>
+      <details>
+        <summary id="activity-count">Submission history</summary>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Participant</th>
+                <th>Challenge</th>
+                <th>Status</th>
+                <th>Speedup</th>
+                <th>Runtime</th>
+              </tr>
+            </thead>
+            <tbody id="activity"></tbody>
+          </table>
+        </div>
+      </details>
+      <footer id="updated">Waiting for server</footer>
+    </main>
+    <script>
+      const titles = {
+        1: "Matrix multiplication",
+        2: "Stable softmax",
+        3: "Int8 dot product",
+      };
+      const levels = { 1: "Tensor", 2: "UOps", 3: "Program" };
+      const $ = (id) => document.getElementById(id);
+      const esc = (v) =>
+        String(v).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const fmt = (v) => Number(v).toFixed(2) + "×";
+      const ms = (v) => Number(v).toFixed(3) + " ms";
+
+      function scoreBoard(jobs, challenge) {
+        const names = [...new Set(jobs.map((j) => j.name))];
+        if (!names.length)
+          return '<div class="empty"><strong>Waiting for submissions</strong>Scores will appear as participants submit from their Docker environments.</div>';
+        const rows = names.map((name) => {
+          const attempts = jobs.filter((j) => j.name === name);
+          const best = attempts
+            .filter((j) => j.status === "passed")
+            .sort((a, b) => b.result.speedup - a.result.speedup)[0];
+          return {
+            name,
+            best,
+            latest: attempts.sort((a, b) => b.created - a.created)[0],
+          };
+        });
+        rows.sort(
+          (a, b) =>
+            (b.best?.result.speedup || 0) - (a.best?.result.speedup || 0) ||
+            a.name.localeCompare(b.name),
+        );
+        const max = Math.max(
+          1,
+          ...rows.map((r) => r.best?.result.speedup || 0),
+        );
+        return (
+          `<div class="column-title">${esc(titles[challenge] || "Challenge")} · speedup</div>` +
+          rows
+            .map((r) => {
+              let cell;
+              if (r.best) {
+                const v = r.best.result.speedup;
+                const win = v === rows[0].best?.result.speedup;
+                cell = `<div class="track ${win ? "winner" : ""}" title="${ms(r.best.result.submission_ms)} · baseline ${ms(r.best.result.baseline_ms)}"><div class="fill" style="width:${(100 * v) / max}%"></div><span class="value">${fmt(v)}</span>${win ? '<span class="star">★</span>' : ""}</div>`;
+              } else {
+                let status = r.latest?.status || "waiting";
+                if (status === "passed") status = "complete";
+                cell = `<div class="track ${status === "failed" ? "status failed" : ["running", "queued", "starting"].includes(status) ? "status" : "idle"}">${esc(status)}</div>`;
+              }
+              return `<div class="row"><div class="name" title="${esc(r.name)}">${esc(r.name)}</div>${cell}</div>`;
+            })
+            .join("")
+        );
+      }
+
+      function render(state) {
+        $("architecture").textContent = state.architecture || "CPU";
+        const jobs = state.jobs,
+          round = state.round;
+        const current = round ? jobs.filter((j) => j.round === round.id) : [];
+        $("round-label").textContent = round
+          ? `Challenge ${round.challenge} / ${levels[round.challenge]} · ${titles[round.challenge]}${round.status === "closed" ? " · complete" : ""}`
+          : "Waiting for the organizer to start a challenge";
+        $("board").innerHTML = round
+          ? scoreBoard(current, round.challenge)
+          : '<div class="empty"><strong>Ready when you are.</strong>The next challenge starts when the organizer starts it.</div>';
+        $("counts").textContent =
+          `${current.filter((j) => j.status === "passed").length} passed · ${current.filter((j) => ["queued", "running"].includes(j.status)).length} evaluation`;
+        const previous = (state.rounds || []).filter((r) => r.id !== round?.id);
+        $("history").hidden = !previous.length;
+        $("previous").innerHTML = previous
+          .map(
+            (r) =>
+              `<div class="archive">${scoreBoard(
+                jobs.filter((j) => j.round === r.id),
+                r.challenge,
+              )}</div>`,
+          )
+          .join("");
+        $("activity-count").textContent =
+          `Submission history · ${jobs.length} runs`;
+        $("activity").innerHTML = [...jobs]
+          .sort((a, b) => b.created - a.created)
+          .slice(0, 100)
+          .map(
+            (j) =>
+              `<tr title="${esc(j.error || j.id)}"><td class="muted">${new Date(j.created * 1000).toLocaleTimeString()}</td><td>${esc(j.name)}</td><td>${esc(titles[j.challenge])}</td><td class="${j.status === "passed" ? "pass" : j.status === "failed" ? "fail" : "pending"}">${esc(j.status)}</td><td>${j.result ? fmt(j.result.speedup) : "—"}</td><td>${j.result ? ms(j.result.submission_ms) : "—"}</td></tr>`,
+          )
+          .join("");
+      }
+
+      async function refresh() {
+        try {
+          const response = await fetch("/dashboard", { cache: "no-store" });
+          if (!response.ok) throw Error();
+          const state = await response.json();
+          render(state);
+          $("connection").className = "live";
+          $("connection").textContent = "● Live";
+          $("updated").textContent =
+            "Updated " +
+            new Date().toLocaleTimeString() +
+            " · median of 11 runs · initialization and compilation excluded";
+        } catch {
+          $("connection").className = "offline";
+          $("connection").textContent = "Reconnecting…";
+        } finally {
+          setTimeout(refresh, 1000);
+        }
+      }
+
+      refresh();
+    </script>
+  </body>
+</html>
