@@ -1,6 +1,8 @@
 """Check and submit workshop solutions."""
 import argparse, json, os, pathlib, runpy, time, urllib.request
 
+WORKSHOP_SERVER = "https://hk-workshop.vercel.app"
+
 def local_check(path, challenge):
   import numpy as np
   from tinygrad import Device, Tensor, dtypes
@@ -55,13 +57,12 @@ def main():
     command.add_argument("--challenge", choices=["1", "2", "3"])
 
   submit_command.add_argument("--name", required=True)
-  submit_command.add_argument("--server", default=os.environ.get("WORKSHOP_SERVER", "https://hk-workshop.vercel.app"))
   args = parser.parse_args()
 
   challenge = args.challenge or pathlib.Path(args.file).stem
   if args.command == "check": return local_check(args.file, challenge)
 
-  url = args.server.rstrip("/")
+  url = WORKSHOP_SERVER
   current = request(url + "/dashboard").get("round")
   if not current: raise ValueError("no active challenge; wait for the organizer")
   job = request(url + "/submissions", {"name": args.name, "challenge": challenge,

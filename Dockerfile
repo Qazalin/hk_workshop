@@ -9,7 +9,7 @@ RUN mkdir -p /home/coder/.local/share/code-server/User && printf '{"workbench.co
     && chown -R coder:coder /home/coder/.local
 COPY --chown=coder:coder 1.py 2.py 3.py workshop.py README.md /home/coder/workshop/
 
-ENV DEV=CPU WORKSHOP_SERVER=https://hk-workshop.vercel.app
+ENV DEV=CPU
 USER coder
 WORKDIR /home/coder/workshop
 
