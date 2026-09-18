@@ -1,2 +1,2 @@
-tinygrad @ git+https://github.com/tinygrad/tinygrad.git
+tinygrad @ git+https://github.com/tinygrad/tinygrad.git@f061a41869918cc9f306019d463e5c2ed17ce6b2
 numpy
