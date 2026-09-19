@@ -9,11 +9,11 @@ COPY entrypoint.sh /usr/local/bin/workshop-entrypoint
 RUN python -m pip install --break-system-packages --no-cache-dir -r /tmp/requirements.txt
 RUN mkdir -p /home/coder/.local/share/code-server/User && printf '{"workbench.colorTheme":"Default Dark Modern","terminal.integrated.cwd":"/home/coder/workshop","remote.autoForwardPorts":false}\n' > /home/coder/.local/share/code-server/User/settings.json \
     && chown -R coder:coder /home/coder/.local
-COPY --chown=coder:coder 1.py 2.py 3.py workshop.py README.md /home/coder/workshop/
+COPY --chown=coder:coder 0.py 1.py 2.py 3.py workshop.py README.md /home/coder/workshop/
 
 ENV DEV=CPU
 USER coder
 WORKDIR /home/coder/workshop
 
 EXPOSE 8080
-CMD ["/bin/sh", "/usr/local/bin/workshop-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/workshop-entrypoint"]
